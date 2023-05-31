@@ -16,9 +16,9 @@ public class QueryParameterConstraintAttribute : Attribute, IActionConstraint
 
     public bool Accept(ActionConstraintContext context)
     {
-        bool ParameterChecker(string parameterName) => context.RouteContext.HttpContext.Request.Query.Keys.Contains(parameterName);
+        bool ParameterExists(string parameterName) => context.RouteContext.HttpContext.Request.Query.Keys.Contains(parameterName);
 
-        return ParameterChecker(_parameterName) && !ParameterChecker(_exclusiveParameterName ?? "");
+        return ParameterExists(_parameterName) && !ParameterExists(_exclusiveParameterName ?? "");
     }
 
     public int Order { get; }
