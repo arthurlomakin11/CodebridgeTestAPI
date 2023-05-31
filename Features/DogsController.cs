@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Dynamic.Core;
 
 namespace CodebridgeTestAPI.Controllers;
 
@@ -7,11 +8,7 @@ namespace CodebridgeTestAPI.Controllers;
 public class DogsController : ControllerBase
 {
     private readonly DogsDbContext _dbContext;
-
-    public DogsController(DogsDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
+    public DogsController(DogsDbContext dbContext) => _dbContext = dbContext;
 
     [HttpGet("ping")]
     public string Ping()
@@ -28,7 +25,7 @@ public class DogsController : ControllerBase
     public enum OrderType { Asc, Desc }
 
     [HttpGet("dogs")]
-    [QueryParameterConstraintAttribute("order", "pageNumber")]
+    [QueryParameterConstraintAttribute("attribute", "pageNumber")]
     public async Task<IEnumerable<Dog>> Dogs(OrderType order, string attribute)
     {
         return await _dbContext.Dogs
@@ -38,7 +35,7 @@ public class DogsController : ControllerBase
     }
     
     [HttpGet("dogs")]
-    [QueryParameterConstraintAttribute("pageNumber", "order")]
+    [QueryParameterConstraintAttribute("pageNumber", "attribute")]
     public async Task<IEnumerable<Dog>> Dogs(int pageNumber, int? limit, int pageSize)
     {
         return await _dbContext.Dogs
@@ -51,12 +48,12 @@ public class DogsController : ControllerBase
     
     [HttpGet("dogs")]
     [QueryParameterConstraintAttribute("pageNumber")]
-    [QueryParameterConstraintAttribute("order")]
+    [QueryParameterConstraintAttribute("attribute")]
     public async Task<IEnumerable<Dog>> Dogs(OrderType order, string attribute, int pageNumber, int? limit, int pageSize)
     {
         return await _dbContext.Dogs
             .AsNoTracking()
-            .OrderBy(d => d.Name)
+            .OrderBy(attribute)
             .Skip((pageNumber - 1) * pageSize)
             .Take(limit ?? pageSize)
             .ToListAsync();
