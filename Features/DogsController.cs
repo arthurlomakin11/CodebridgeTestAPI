@@ -11,26 +11,13 @@ public class DogsController : ControllerBase
     private readonly DogsDbContext _dbContext;
     public DogsController(DogsDbContext dbContext) => _dbContext = dbContext;
 
-    [HttpGet("ping")]
-    public string Ping()
-    {
-        return "Dogs house service. Version 1.0.1";
-    }
-    
     [HttpGet("dogs")]
     public async Task<IEnumerable<Dog>> Dogs()
     {
-        return await _dbContext.Dogs.AsNoTracking().ToListAsync();
+        var initialPipe = _dbContext.Dogs.AsNoTracking();
+        return await initialPipe.ToListAsync();
     }
 
-    public enum OrderType { Asc, Desc }
-
-    private interface ISortingModel
-    {
-        public OrderType order { get; set; }
-        public string attribute { get; set; }
-    }
-    
     public class SortingModel: ISortingModel
     {
         public OrderType order { get; set; }
@@ -43,19 +30,10 @@ public class DogsController : ControllerBase
     public async Task<IEnumerable<Dog>> Dogs([FromQuery] SortingModel query)
     {
         var initialPipe = _dbContext.Dogs.AsNoTracking();
-        var orderByPipe = initialPipe.OrderBy($"{query.attribute} {query.order.ToString()}");
+        var orderByPipe = QueryPipes.OrderByPipe(initialPipe, query);
         return await orderByPipe.ToListAsync();
     }
 
-    private interface IPagingModel
-    {
-        public int pageNumber { get; set; }
-        
-        public int pageSize { get; set; }
-        
-        public int? limit { get; set; }
-    }
-    
     public class PagingModel: IPagingModel
     {
         public int pageNumber { get; set; }
@@ -70,7 +48,7 @@ public class DogsController : ControllerBase
     public async Task<IEnumerable<Dog>> Dogs([FromQuery] PagingModel query)
     {
         var initialPipe = _dbContext.Dogs.AsNoTracking().OrderBy(d => d.Id);
-        var pagingPipe = initialPipe.Skip((query.pageNumber - 1) * query.pageSize).Take(query.limit ?? query.pageSize);
+        var pagingPipe = QueryPipes.PagingPipe(initialPipe, query);
         
         return await pagingPipe.ToListAsync();
     }
@@ -91,16 +69,39 @@ public class DogsController : ControllerBase
     public async Task<IEnumerable<Dog>> Dogs([FromQuery] PagingAndSortingModel query)
     {
         var initialPipe = _dbContext.Dogs.AsNoTracking();
-        var orderByPipe = initialPipe.OrderBy($"{query.attribute} {query.order.ToString()}");
-        var pagingPipe = orderByPipe.Skip((query.pageNumber - 1) * query.pageSize).Take(query.limit ?? query.pageSize);
+        var orderByPipe = QueryPipes.OrderByPipe(initialPipe, query);
+        var pagingPipe = QueryPipes.PagingPipe(orderByPipe, query);
         
         return await pagingPipe.ToListAsync();
     }
+}
 
-    [HttpPost("dog")]
-    public async Task AddDog(Dog newDog)
+public interface IPagingModel
+{
+    public int pageNumber { get; set; }
+        
+    public int pageSize { get; set; }
+        
+    public int? limit { get; set; }
+}
+
+public interface ISortingModel
+{
+    public OrderType order { get; set; }
+    public string attribute { get; set; }
+}
+
+public enum OrderType { Asc, Desc }
+
+public static class QueryPipes
+{
+    public static IQueryable<Dog> OrderByPipe(IQueryable<Dog> previousPipe, ISortingModel query)
     {
-        await _dbContext.Dogs.AddAsync(newDog);
-        await _dbContext.SaveChangesAsync();
+        return previousPipe.OrderBy($"{query.attribute} {query.order.ToString()}");
+    }
+    
+    public static IQueryable<Dog> PagingPipe(IQueryable<Dog> previousPipe, IPagingModel query)
+    {
+        return previousPipe.Skip((query.pageNumber - 1) * query.pageSize).Take(query.limit ?? query.pageSize);
     }
 }

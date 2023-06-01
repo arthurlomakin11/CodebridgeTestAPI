@@ -7,8 +7,7 @@ namespace CodebridgeTestAPI;
 [Index(nameof(Name), IsUnique=true)]
 public class Dog
 {
-    [Key]
-    [JsonIgnore]
+    [Key, JsonIgnore]
     public int Id { get; set; }
 
     
