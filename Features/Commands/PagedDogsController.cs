@@ -1,13 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace CodebridgeTestAPI.Controllers;
+namespace CodebridgeTestAPI.Features;
 
 public class PagesDogsController: DogsController
 {
     public PagesDogsController(DogsDbContext dbContext) : base(dbContext) { }
 
     [HttpGet("dogs")]
-    [QueryParameterConstraintAttribute("pageNumber", "attribute")]
+    [QueryParameterConstraint("pageNumber")]
+    [QueryParameterExclusion("attribute")]
     public IQueryable<Dog> Dogs([FromQuery] PagingModel query)
     {
         var pagingPipe = QueryPipes.PagingPipe(_initialPipe, query);

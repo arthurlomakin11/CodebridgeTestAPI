@@ -1,6 +1,6 @@
 ﻿using System.Linq.Dynamic.Core;
 
-namespace CodebridgeTestAPI.Controllers;
+namespace CodebridgeTestAPI.Features;
 
 public static class QueryPipes
 {

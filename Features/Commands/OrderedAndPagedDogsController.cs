@@ -1,15 +1,15 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CodebridgeTestAPI.Controllers;
+namespace CodebridgeTestAPI.Features;
 
 public class OrderedAndPagedDogsController: DogsController
 {
     public OrderedAndPagedDogsController(DogsDbContext dbContext) : base(dbContext) { }
 
     [HttpGet("dogs")]
-    [QueryParameterConstraintAttribute("pageNumber")]
-    [QueryParameterConstraintAttribute("attribute")]
+    [QueryParameterConstraint("pageNumber")]
+    [QueryParameterConstraint("attribute")]
     public IQueryable<Dog> Dogs([FromQuery] PagingAndOrderingModel query)
     {
         var orderByPipe = QueryPipes.OrderByPipe(_initialPipe, query);

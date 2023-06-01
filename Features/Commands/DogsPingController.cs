@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace CodebridgeTestAPI.Controllers;
+namespace CodebridgeTestAPI.Features;
 
 [ApiController]
 public class DogsPingController
