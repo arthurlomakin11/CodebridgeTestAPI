@@ -4,13 +4,15 @@ namespace CodebridgeTestAPI.Features;
 
 public static class QueryPipes
 {
-    public static IQueryable<Dog> OrderByPipe(IQueryable<Dog> previousPipe, IOrderingModel query)
+    public static IQueryable<Dog> OrderPipe(this IQueryable<Dog> previousPipe, IOrderingModel query)
     {
-        return previousPipe.OrderBy($"{query.attribute} {query.order.ToString()}");
+        return previousPipe.OrderBy($"{query.attribute} {query.order.ToString()}"); // using Dynamic LINQ for property access
     }
     
-    public static IQueryable<Dog> PagingPipe(IQueryable<Dog> previousPipe, IPagingModel query)
+    public static IQueryable<Dog> PagingPipe(this IQueryable<Dog> previousPipe, IPagingModel query)
     {
-        return previousPipe.Skip((query.pageNumber - 1) * query.pageSize).Take(query.limit ?? query.pageSize);
+        return previousPipe
+            .Skip((query.pageNumber - 1) * query.pageSize)
+            .Take(query.limit ?? query.pageSize);
     }
 }

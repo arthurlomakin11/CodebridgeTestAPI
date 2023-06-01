@@ -2,7 +2,7 @@
 
 namespace CodebridgeTestAPI.Features;
 
-public class AllDogsController: DogsController
+public class AllDogsController: BaseDogsController
 {
     public AllDogsController(DogsDbContext dbContext) : base(dbContext) { }
     
