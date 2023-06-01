@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Dynamic.Core;
@@ -24,39 +25,76 @@ public class DogsController : ControllerBase
 
     public enum OrderType { Asc, Desc }
 
+    private interface ISortingModel
+    {
+        public OrderType order { get; set; }
+        public string attribute { get; set; }
+    }
+    
+    public class SortingModel: ISortingModel
+    {
+        public OrderType order { get; set; }
+        [RegularExpression("name|color|tail_length|weight", ErrorMessage = "Invalid value for attribute")]
+        public string attribute { get; set; }
+    }
+
     [HttpGet("dogs")]
     [QueryParameterConstraintAttribute("attribute", "pageNumber")]
-    public async Task<IEnumerable<Dog>> Dogs(OrderType order, string attribute)
+    public async Task<IEnumerable<Dog>> Dogs([FromQuery] SortingModel query)
     {
-        return await _dbContext.Dogs
-            .AsNoTracking()
-            .OrderBy(d => d.Name)
-            .ToListAsync();
+        var initialPipe = _dbContext.Dogs.AsNoTracking();
+        var orderByPipe = initialPipe.OrderBy($"{query.attribute} {query.order.ToString()}");
+        return await orderByPipe.ToListAsync();
+    }
+
+    private interface IPagingModel
+    {
+        public int pageNumber { get; set; }
+        
+        public int pageSize { get; set; }
+        
+        public int? limit { get; set; }
+    }
+    
+    public class PagingModel: IPagingModel
+    {
+        public int pageNumber { get; set; }
+        
+        public int pageSize { get; set; }
+        
+        public int? limit { get; set; }
     }
     
     [HttpGet("dogs")]
     [QueryParameterConstraintAttribute("pageNumber", "attribute")]
-    public async Task<IEnumerable<Dog>> Dogs(int pageNumber, int? limit, int pageSize)
+    public async Task<IEnumerable<Dog>> Dogs([FromQuery] PagingModel query)
     {
-        return await _dbContext.Dogs
-            .AsNoTracking()
-            .OrderBy(d => d.Id)
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(limit ?? pageSize)
-            .ToListAsync();
+        var initialPipe = _dbContext.Dogs.AsNoTracking().OrderBy(d => d.Id);
+        var pagingPipe = initialPipe.Skip((query.pageNumber - 1) * query.pageSize).Take(query.limit ?? query.pageSize);
+        
+        return await pagingPipe.ToListAsync();
+    }
+    
+    public class PagingAndSortingModel: IPagingModel, ISortingModel
+    {
+        public int pageNumber { get; set; }
+        public int pageSize { get; set; }
+        public int? limit { get; set; }
+        public OrderType order { get; set; }
+        [RegularExpression("name|color|tail_length|weight", ErrorMessage = "Invalid value for attribute")]
+        public string attribute { get; set; }
     }
     
     [HttpGet("dogs")]
     [QueryParameterConstraintAttribute("pageNumber")]
     [QueryParameterConstraintAttribute("attribute")]
-    public async Task<IEnumerable<Dog>> Dogs(OrderType order, string attribute, int pageNumber, int? limit, int pageSize)
+    public async Task<IEnumerable<Dog>> Dogs([FromQuery] PagingAndSortingModel query)
     {
-        return await _dbContext.Dogs
-            .AsNoTracking()
-            .OrderBy(attribute)
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(limit ?? pageSize)
-            .ToListAsync();
+        var initialPipe = _dbContext.Dogs.AsNoTracking();
+        var orderByPipe = initialPipe.OrderBy($"{query.attribute} {query.order.ToString()}");
+        var pagingPipe = orderByPipe.Skip((query.pageNumber - 1) * query.pageSize).Take(query.limit ?? query.pageSize);
+        
+        return await pagingPipe.ToListAsync();
     }
 
     [HttpPost("dog")]
