@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 
 namespace CodebridgeTestAPI;
@@ -7,7 +8,7 @@ namespace CodebridgeTestAPI;
 [Index(nameof(Name), IsUnique=true)]
 public class Dog
 {
-    [Key, JsonIgnore]
+    [Key, JsonIgnore, BindNever]
     public int Id { get; set; }
 
     
@@ -15,15 +16,15 @@ public class Dog
     public string Name { get; set; }
 
     
-    [Required(AllowEmptyStrings = false)] 
+    [Required(AllowEmptyStrings = false)]
     public string Color { get; set; }
 
 
-    [Range(1, int.MaxValue)]
+    [Required, Range(1, int.MaxValue)]
     [JsonPropertyName("tail_length")]
     public int TailLength { get; set; }
     
     
-    [Range(1, int.MaxValue)] 
+    [Required, Range(1, int.MaxValue)] 
     public int Weight { get; set; }
 }
