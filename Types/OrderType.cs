@@ -1,4 +1,4 @@
-﻿namespace CodebridgeTestAPI.Features;
+﻿namespace CodebridgeTestAPI;
 
 public enum OrderType
 {
