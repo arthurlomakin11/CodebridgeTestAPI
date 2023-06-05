@@ -4,13 +4,13 @@ namespace CodebridgeTestAPI.Features;
 
 public class PagingAndOrderingModel: IPagingModel, IOrderingModel
 {
-    [Range(0, int.MaxValue)]
+    [Range(1, int.MaxValue)]
     public int pageNumber { get; set; }
     
-    [Range(0, int.MaxValue)]
+    [Range(1, int.MaxValue)]
     public int pageSize { get; set; }
     
-    [Range(0, int.MaxValue)]
+    [Range(1, int.MaxValue)]
     public int? limit { get; set; }
     public OrderType order { get; set; }
     
