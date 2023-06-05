@@ -17,4 +17,4 @@ services:
       - "5000:1433"
     environment:
       - MSSQL_SA_PASSWORD=xsf73.,23
-      - ACCEPT_EULA=true
+      - ACCEPT_EULA=Y
