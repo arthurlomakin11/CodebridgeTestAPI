@@ -6,9 +6,14 @@ public static class QueryPipes
 {
     public static IQueryable<Dog> OrderPipe(this IQueryable<Dog> previousPipe, IOrderingModel query)
     {
-        return previousPipe.OrderBy($"{query.attribute} {query.order.ToString()}"); // using Dynamic LINQ for property access
+        var attribute = query.attribute switch
+        {
+            "tail_length" => "TailLength",
+            _ => query.attribute
+        };
+        return previousPipe.OrderBy($"{attribute} {query.order.ToString()}"); // using Dynamic LINQ for property access
     }
-    
+
     public static IQueryable<Dog> PagingPipe(this IQueryable<Dog> previousPipe, IPagingModel query)
     {
         return previousPipe

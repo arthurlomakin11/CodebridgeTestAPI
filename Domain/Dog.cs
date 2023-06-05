@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,7 @@ namespace CodebridgeTestAPI;
 public class Dog
 {
     [Key, JsonIgnore, BindNever]
+    [ExcludeFromCodeCoverage]
     public int Id { get; set; }
 
     
@@ -25,6 +27,6 @@ public class Dog
     public int TailLength { get; set; }
     
     
-    [Required, Range(1, int.MaxValue)] 
+    [Required, Range(1, int.MaxValue)]
     public int Weight { get; set; }
 }
