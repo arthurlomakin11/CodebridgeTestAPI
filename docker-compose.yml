@@ -1,0 +1,20 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5024:80"
+    depends_on:
+      - db
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+
+  db:
+    image: "mcr.microsoft.com/mssql/server:2022-latest"
+    container_name: db
+    ports:
+      - "5000:1433"
+    environment:
+      - MSSQL_SA_PASSWORD=xsf73.,23
+      - ACCEPT_EULA=true
